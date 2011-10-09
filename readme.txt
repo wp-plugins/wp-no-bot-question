@@ -29,6 +29,9 @@ This section describes how to install the plugin and get it working.
 = How do I change or disable this plugin's settings? =
 Disable and edit the question and answer under "Settings -> Edit WP No-Bot Question"
 
+= Why is the CAPTCHA / Question-box not showing up? =
+Make sure you are using a WordPress 3.0 theme - upgrade your theme to use `comment_form()` or make sure it calls `do_action('comment_form_after_fields');` somewhere in the comment box.
+
 == Screenshots ==
 
 
