@@ -6,7 +6,7 @@ Description: Simple question that blocks most spambots (and paid robots) by maki
 Version: 0.1
 Author: Compdigitec
 Author URI: http://www.compdigitec.com/
-License: BSD
+License: 3-clause BSD
 Text Domain: wp_nobot_question
 */
 define('wp_nobot_question_version','0.1');
