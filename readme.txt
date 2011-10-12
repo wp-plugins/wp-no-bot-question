@@ -10,11 +10,11 @@ Simple question that blocks most spambots (and paid robots) by making them answe
 
 == Description ==
 
-This plugin is just a very effective yet simple plugin which adds a question to the comment form that blocks most automated spam-bots by making them answer a common sense question. For optimal effectiveness, you might want to consider changing the question periodically so that the spambots can't "memorize" the question and answer.
-
-Multiple answers can be added to account for variances in answers. (e.g. "five", "Five", "5")
+This plugin is just a very effective yet simple plugin which adds a question to the comment form that blocks most automated spam-bots by making them answer a common sense question. For optimal effectiveness, you might want to consider changing the question periodically so that the spambots can't "memorize" the question and answer. Multiple answers can be added to account for variances in answers. (e.g. "five", "Five", "5")
 
 Plugin homepage: http://www.compdigitec.com/apps/wpnobot
+
+Please drop a [comment](http://www.compdigitec.com/labs/2011/10/09/wp-no-bot-question-plugin-for-wordpress/ "WP No-bot Question plugin for WordPress") if it works for you, if you found any bugs or if you have suggestions/ideas for this plugin - complaints welcome!
 
 == Installation ==
 

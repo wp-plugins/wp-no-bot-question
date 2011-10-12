@@ -81,7 +81,7 @@ function wp_nobot_question_comment_field() {
 }
 
 function wp_nobot_question_filter($x) {
-	if(current_user_can('editor') || current_user_can('administrator')) {
+	if(current_user_can('editor') || current_user_can('administrator') || $x['comment_type'] == 'pingback' || $x['comment_type'] == 'trackback') {
 		return $x;
 	}
 	if(!array_key_exists('wp_nobot_answer',$_POST) || trim($_POST['wp_nobot_answer']) == '') {
@@ -157,7 +157,7 @@ echo "<script id=\"wp_nobot_question_placeholder\">ct = $i;</script>";
 
 <?php submit_button(); ?>
 </form>
-<p>WP No-Bot Question version <?php echo wp_nobot_question_version; ?> by <a href="http://www.compdigitec.com/">Compdigitec</a>. You can find support at <a href="http://www.compdigitec.com/apps/wpnobot/">the plugin's homepage</a>.</p>
+<p>WP No-Bot Question version <?php echo wp_nobot_question_version; ?> by <a href="http://www.compdigitec.com/">Compdigitec</a>. You can find support at <a href="http://www.compdigitec.com/apps/wpnobot/">the plugin's homepage</a> - bugs and suggestions welcome.</p>
 </div>
 <?php
 }
