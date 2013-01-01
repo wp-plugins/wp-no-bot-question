@@ -3,13 +3,13 @@
 Plugin Name: WP No-Bot Question
 Plugin URI: http://www.compdigitec.com/apps/wpnobot/
 Description: Simple question that blocks most spambots (and paid robots) by making them answer a common sense question
-Version: 0.1.1
+Version: 0.1.2
 Author: Compdigitec
 Author URI: http://www.compdigitec.com/
 License: 3-clause BSD
 Text Domain: wp_nobot_question
 */
-define('wp_nobot_question_version','0.1.1');
+define('wp_nobot_question_version','0.1.2');
 /*
  *      Redistribution and use in source and binary forms, with or without
  *      modification, are permitted provided that the following conditions are
@@ -38,6 +38,9 @@ define('wp_nobot_question_version','0.1.1');
  *      OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// Database version
+define('wp_nobot_question_current_db_version',2);
+
 register_activation_hook( __FILE__, 'wp_nobot_question_activate' );
 register_deactivation_hook( __FILE__, 'wp_nobot_question_deactivate' );
 register_uninstall_hook( __FILE__, 'wp_nobot_question_remove' );
@@ -53,9 +56,10 @@ add_action('user_registration_email', 'wp_nobot_question_filter');
 add_action('register_form', 'wp_nobot_question_registration_field');
 
 function wp_nobot_question_activate() {
+	if(get_option('wp_nobot_question_db_version') === false) add_option('wp_nobot_question_db_version', wp_nobot_question_current_db_version);
 	if(get_option('wp_nobot_question_enable') === false) add_option('wp_nobot_question_enable',true);
-	if(get_option('wp_nobot_question_question') === false) add_option('wp_nobot_question_question','What is the sum of 2 and 3?');
-	if(get_option('wp_nobot_question_answers') === false) add_option('wp_nobot_question_answers',Array('five','Five','5'));
+	if(get_option('wp_nobot_question_questions') === false) add_option('wp_nobot_question_questions',Array('What is the sum of 2 and 7?'));
+	if(get_option('wp_nobot_question_answers') === false) add_option('wp_nobot_question_answers',Array(Array('nine','Nine','9')));
 	if(get_option('wp_nobot_question_registration') === false) add_option('wp_nobot_question_registration',false);
 }
 
@@ -64,8 +68,9 @@ function wp_nobot_question_deactivate() {
 }
 
 function wp_nobot_question_remove() {
+	delete_option('wp_nobot_question_db_version');
 	delete_option('wp_nobot_question_enable');
-	delete_option('wp_nobot_question_question');
+	delete_option('wp_nobot_question_questions');
 	delete_option('wp_nobot_question_answers');
 	delete_option('wp_nobot_question_registration');
 }
@@ -77,6 +82,13 @@ function wp_nobot_question_init() {
 
 function wp_nobot_question_admin_init() {
 	add_submenu_page( 'options-general.php', 'WP No-bot Question &rarr; Edit Question', 'WP No-bot Question', 'moderate_comments', 'wp_nobot_question_page', 'wp_nobot_question_admin' );
+	if(get_option('wp_nobot_question_question') !== false) { /* database version 1 */
+		// we now support multiple questions
+		add_option('wp_nobot_question_questions',Array(strval(get_option('wp_nobot_question_question'))));
+		delete_option('wp_nobot_question_question');
+		update_option('wp_nobot_question_answers',Array(get_option('wp_nobot_question_answers')));
+		add_option('wp_nobot_question_db_version', wp_nobot_question_current_db_version);
+	}
 }
 
 function wp_nobot_question_comment_field() {
@@ -94,7 +106,11 @@ function wp_nobot_question_field($context = 'comment') {
 	     ) return;
 ?>
 <p class="comment-form-wp_nobot_question">
-	<label for="wp_nobot_answer"><?php echo wp_nobot_question_get_option('question'); ?> (<?php _e('Required','wp_nobot_question'); ?>)</label>
+	<?php
+	$questions = wp_nobot_question_get_option('questions');
+	$selected_id = rand(0,count($questions)-1);
+	?>
+	<label for="wp_nobot_answer"><?php echo htmlspecialchars($questions[$selected_id]); ?> (<?php _e('Required','wp_nobot_question'); ?>)</label>
 	<input
 		id="wp_nobot_answer"
 		name="wp_nobot_answer"
@@ -102,7 +118,9 @@ function wp_nobot_question_field($context = 'comment') {
 		value=""
 		size="30"
 		<?php if($context == 'registration') { ?> tabindex="25" <?php }; ?>
-	/></p>
+	/>
+	<input type="hidden" name="wp_nobot_answer_question" value="<?php echo $selected_id; ?>" />
+	</p>
 <?php
 }
 
@@ -116,9 +134,13 @@ function wp_nobot_question_filter($x) {
 	if(!array_key_exists('wp_nobot_answer',$_POST) || trim($_POST['wp_nobot_answer']) == '') {
 		wp_die(__('Error: Please fill in the required question.','wp_nobot_question'));
 	}
-	$answers = get_option('wp_nobot_question_answers');
-	foreach($answers as $answer) {
-		if(trim($_POST['wp_nobot_answer']) == $answer) return $x;
+	$question_id = intval($_POST['wp_nobot_answer_question']);
+	$answers_all = wp_nobot_question_get_option('answers');
+	if($question_id < count($answers_all)) {
+		$answers = $answers_all[$question_id];
+		foreach($answers as $answer) {
+			if(trim($_POST['wp_nobot_answer']) == $answer) return $x;
+		}
 	}
 	wp_die(__('Error: Please fill in the correct answer to the question.','wp_nobot_question'));
 }
@@ -128,8 +150,10 @@ function wp_nobot_question_get_option($o) {
 		case 'enable':
 			return (bool)get_option('wp_nobot_question_enable');
 		break;
-		case 'question':
-			return strval(get_option('wp_nobot_question_question'));
+		case 'questions':
+			$tmp = get_option('wp_nobot_question_questions');
+			if( $tmp === false ) return Array();
+			else return $tmp;
 		break;
 		case 'answers':
 			$tmp = get_option('wp_nobot_question_answers');
@@ -144,20 +168,62 @@ function wp_nobot_question_get_option($o) {
 	}
 }
 
+function wp_nobot_question_template($id_,$question,$answers) {
+	$id = intval($id_);
+?>
+	<tr valign="top" class="wp_nobot_question_row_<?php echo $id; ?>">
+	<th scope="row"><?php _e('Question to present to bot','wp_nobot_question'); ?></th>
+	<td>
+		<input type="input" name="wp_nobot_question_question_<?php echo $id; ?>" size="70" value="<?php echo $question; ?>" placeholder="<?php _e('Type here to add a new question','wp_nobot_question'); ?>" /><a href="javascript:void(0)" onclick="wp_nobot_question_delete_entire_question(&quot;<?php echo $id ?>&quot;)"><?php echo __('Delete Question'); ?></a>
+	</td>
+	</tr>
+	<tr valign="top" class="wp_nobot_question_row_<?php echo $id; ?>">
+	<th scope="row"><?php _e('Possible Answers','wp_nobot_question'); ?></th>
+	<td>
+<?php
+$i = 0;
+foreach($answers as $value) {
+	echo "<span id=\"wp_nobot_question_line_{$id}_$i\">";
+	printf('<input type="input" id="wp_nobot_question_answer_%1$d_%2$d" name="wp_nobot_question_answers_%1$d[]" size="70" value="%3$s" />', $id, $i, $value);
+	echo "<a href=\"javascript:void(0)\" onclick=\"wp_nobot_question_delete(&quot;$id&quot;, &quot;$i&quot;)\">" . __('Delete') . "</a>";
+	echo "<br /></span>\n";
+	$i++;
+}
+echo "<script id=\"wp_nobot_question_placeholder_$id\">ct[$id] = $i;</script>";
+?>
+<button onclick="return wp_nobot_question_add_newitem(<?php echo $id; ?>)"><?php _e('Add New','wp_nobot_question'); ?></button>
+	</td>
+	</tr>
+<?php
+}
+
 function wp_nobot_question_admin() {
 	if(!current_user_can('moderate_comments')) return;
 	if(isset($_POST['submit'])) {
+		$questions = Array();
+		$answers = Array();
+		foreach($_POST as $key => $value) {
+			if(strpos($key, 'wp_nobot_question_question_') === 0) {
+				// value starts with wp_nobot_question_question_
+				$q_id = str_replace('wp_nobot_question_question_','',$key);
+				if(trim(strval($value)) != '') { // if not empty
+					$questions[] = trim(strval($value));
+					$answers[] = array_filter($_POST['wp_nobot_question_answers_' . $q_id]);
+				}
+			}
+		}
 		update_option('wp_nobot_question_enable',(bool)$_POST['wp_nobot_question_enabled']);
-		update_option('wp_nobot_question_question',(string)$_POST['wp_nobot_question_question']);
-		update_option('wp_nobot_question_answers',$_POST['wp_nobot_question_answers']);
+		update_option('wp_nobot_question_questions', $questions);
+		update_option('wp_nobot_question_answers', $answers);
 		if(array_key_exists( 'wp_nobot_question_registration', $_POST ))
 			update_option('wp_nobot_question_registration', true);
 		else
 			update_option('wp_nobot_question_registration', false);
 		add_settings_error('wp_nobot_question', 'wp_nobot_question_updated', __('WP No-Bot Question settings updated.','wp_nobot_question'), 'updated');
 	}
+
 	$wp_nobot_question_enabled = wp_nobot_question_get_option('enable');
-	$wp_nobot_question_question = wp_nobot_question_get_option('question');
+	$wp_nobot_question_questions = wp_nobot_question_get_option('questions');
 	$wp_nobot_question_answers = wp_nobot_question_get_option('answers');
 	$wp_nobot_question_registration = wp_nobot_question_get_option('registration');
 	?>
@@ -185,37 +251,35 @@ function wp_nobot_question_admin() {
 		</fieldset>
 	</td>
 	</tr>
-	<tr valign="top">
-	<th scope="row"><?php _e('Question to present to bot','wp_nobot_question'); ?></th>
+	<tr colspan="2">
 	<td>
-		<input type="input" name="wp_nobot_question_question" size="70" value="<?php echo $wp_nobot_question_question; ?>" />
+		<b><?php _e('Questions to present to bot','wp_nobot_question'); ?></b>
 	</td>
 	</tr>
-	<tr valign="top">
-	<th scope="row"><?php _e('Possible Answers','wp_nobot_question'); ?></th>
-	<td>
-<?php
-$i = 0;
-foreach($wp_nobot_question_answers as $value) {
-	echo "<span id=\"wp_nobot_question_line_$i\"><input type=\"input\" id=\"wp_nobot_question_answer_$i\" name=\"wp_nobot_question_answers[]\" size=\"70\" value=\"$value\" /><a href=\"javascript:void(0)\" onclick=\"wp_nobot_question_delete(&quot;$i&quot;)\">" . __('Delete') . "</a><br /></span>";
-	$i++;
-}
-echo "<script id=\"wp_nobot_question_placeholder\">ct = $i;</script>";
-?>
-<button onclick="return wp_nobot_question_add_newitem()"><?php _e('Add New','wp_nobot_question'); ?></button>		
 	<script type="text/javascript">
-	function wp_nobot_question_delete(x) {
-		jQuery("#wp_nobot_question_line_" + x).remove();
+	var ct = Array();
+	function wp_nobot_question_delete(id, x) {
+		jQuery("#wp_nobot_question_line_" + id + "_" + x).remove();
 	}
-	
-	function wp_nobot_question_add_newitem() {
-		jQuery("#wp_nobot_question_placeholder").before("<span id=\"wp_nobot_question_line_" + ct + "\"><input type=\"input\" id=\"wp_nobot_question_answer_" + ct + "\" name=\"wp_nobot_question_answers[]\" size=\"70\" value=\"\" placeholder=\"Enter a new answer here\" /><a href=\"javascript:void(0)\" onclick=\"wp_nobot_question_delete(&quot;" + ct + "&quot;)\"><?php echo __('Delete'); ?></a><br /></span>");
-		ct++;
+
+	function wp_nobot_question_delete_entire_question(id) {
+		jQuery("tr.wp_nobot_question_row_" + id).remove();
+	}
+
+	function wp_nobot_question_add_newitem(id) {
+		jQuery("#wp_nobot_question_placeholder_" + id).before("<span id=\"wp_nobot_question_line_" + id + "_" + ct[id] + "\"><input type=\"input\" id=\"wp_nobot_question_answer_" + id + "_" + ct + "\" name=\"wp_nobot_question_answers_" + id + "[]\" size=\"70\" value=\"\" placeholder=\"<?php _e('Enter a new answer here','wp_nobot_question'); ?>\" /><a href=\"javascript:void(0)\" onclick=\"wp_nobot_question_delete(&quot;" + id + "&quot;, &quot;" + ct[id] + "&quot;)\"><?php echo __('Delete'); ?></a><br /></span>");
+		ct[id]++;
 		return false;
 	}
 	</script>
-	</td>
-	</tr>
+	<?php
+	$i = 0;
+	foreach($wp_nobot_question_questions as $question) {
+		wp_nobot_question_template($i, $question, $wp_nobot_question_answers[$i]);
+		$i++;
+	}
+	wp_nobot_question_template($i, '', Array());
+	?>
 </table>
 
 <?php submit_button(); ?>

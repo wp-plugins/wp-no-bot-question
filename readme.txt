@@ -3,14 +3,14 @@ Contributors: edwardw
 Donate link: http://www.compdigitec.com/
 Tags: anti-bot, anti-spam, comments, question, captcha, anti-bot question, anti-spam question, bots
 Requires at least: 3.1
-Tested up to: 3.4
+Tested up to: 3.6
 Stable tag: trunk
 
 Simple question that blocks most spambots (and paid robots) by making them answer a common sense question
 
 == Description ==
 
-This plugin is just a very effective yet simple plugin which adds a question to the comment form that blocks most automated spam-bots by making them answer a common sense question. For optimal effectiveness, you might want to consider changing the question periodically so that the spambots can't "memorize" the question and answer. Multiple answers can be added to account for variances in answers. (e.g. "five", "Five", "5")
+This plugin is just a very effective yet simple plugin which adds a question to the comment form that blocks most automated spam-bots by making them answer a common sense question. For optimal effectiveness, you should add multiple questions so that the spambots can't "memorize" the question and answer. The plugin will display questions at random to prevent the aformentioned memorization. Multiple answers can be added per question to account for variances in answers. (e.g. "five", "Five", "5")
 
 Plugin homepage: http://www.compdigitec.com/apps/wpnobot
 
@@ -37,6 +37,13 @@ Make sure you are using a WordPress 3.0 theme - upgrade your theme to use `comme
 
 
 == Changelog ==
+= 0.1.2 =
+* c911cc4 Update fr-FR translation
+* e84f760 Bump the version to 0.1.2
+* ce4d073 Implement addition/deletion of multiple questions
+* 2823060 Support multiple questions in the database
+* 01bcabd Factorize question template
+* b07ce93 Don't store empty answers
 
 = 0.1.1 =
 * a0e0933 Translate the delete link when dynamic

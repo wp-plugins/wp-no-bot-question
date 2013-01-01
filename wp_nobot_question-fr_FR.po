@@ -2,63 +2,81 @@
 # This file is distributed under the same license as the WP No-Bot Question package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP No-Bot Question 0.1.1\n"
+"Project-Id-Version: WP No-Bot Question 0.1.2\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/wp_nobot_question\n"
-"POT-Creation-Date: 2012-06-12 00:42:33+00:00\n"
+"POT-Creation-Date: 2013-01-01 01:55:10+00:00\n"
+"PO-Revision-Date: 2012-12-31 21:01-0500\n"
+"Last-Translator: \n"
+"Language-Team: French\n"
+"Language: French\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2012-06-11 20:50-0500\n"
-"Last-Translator: \n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
 
-#: wp_nobot_question.php:97
+#: wp_nobot_question.php:113
 msgid "Required"
 msgstr "Obligatoire"
 
-#: wp_nobot_question.php:117
+#: wp_nobot_question.php:135
 msgid "Error: Please fill in the required question."
 msgstr "Erreur: S'il vous plaît compléter le question obligatoire."
 
-#: wp_nobot_question.php:123
+#: wp_nobot_question.php:145
 msgid "Error: Please fill in the correct answer to the question."
 msgstr "Erreur: S'il vous plaît remplir dans la réponse exacte à la question."
 
-#: wp_nobot_question.php:157
-msgid "WP No-Bot Question settings updated."
-msgstr "WP No-Bot Question paramètres mis à jour."
-
-#: wp_nobot_question.php:172
-msgid "Enable WP No-Bot Question"
-msgstr "Activer"
-
 #: wp_nobot_question.php:175
-msgid "Yes"
-msgstr "Oui"
-
-#: wp_nobot_question.php:176
-msgid "No"
-msgstr "Non"
-
-#: wp_nobot_question.php:181
-msgid "Protect the registration page too?"
-msgstr "Protéger la page d'enregistrement aussi?"
-
-#: wp_nobot_question.php:189
 msgid "Question to present to bot"
 msgstr "Question de présenter au bot"
 
-#: wp_nobot_question.php:195
-msgid "Possible Answers"
-msgstr "Réponses possibles"
+#: wp_nobot_question.php:177
+msgid "Type here to add a new question"
+msgstr "Tapez ici pour ajouter une nouvelle question"
 
-#: wp_nobot_question.php:200
+#: wp_nobot_question.php:177
+msgid "Delete Question"
+msgstr "Supprimez Cette Question"
+
+#: wp_nobot_question.php:181
+msgid "Possible Answers"
+msgstr "Réponses Possibles"
+
+#: wp_nobot_question.php:188
+#: wp_nobot_question.php:270
 msgid "Delete"
 msgstr "Supprimez"
 
-#: wp_nobot_question.php:205
+#: wp_nobot_question.php:194
 msgid "Add New"
 msgstr "Ajoutez"
+
+#: wp_nobot_question.php:222
+msgid "WP No-Bot Question settings updated."
+msgstr "WP No-Bot Question paramètres mis à jour."
+
+#: wp_nobot_question.php:238
+msgid "Enable WP No-Bot Question"
+msgstr "Activer"
+
+#: wp_nobot_question.php:241
+msgid "Yes"
+msgstr "Oui"
+
+#: wp_nobot_question.php:242
+msgid "No"
+msgstr "Non"
+
+#: wp_nobot_question.php:247
+msgid "Protect the registration page too?"
+msgstr "Protéger la page d'enregistrement aussi?"
+
+#: wp_nobot_question.php:256
+msgid "Questions to present to bot"
+msgstr "Question à présenter au bot"
+
+#: wp_nobot_question.php:270
+msgid "Enter a new answer here"
+msgstr "Tapez une nouvelle reponse ici"
 
 #. Plugin Name of the plugin/theme
 msgid "WP No-Bot Question"
