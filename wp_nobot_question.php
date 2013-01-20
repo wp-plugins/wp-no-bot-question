@@ -3,13 +3,13 @@
 Plugin Name: WP No-Bot Question
 Plugin URI: http://www.compdigitec.com/apps/wpnobot/
 Description: Simple question that blocks most spambots (and paid robots) by making them answer a common sense question
-Version: 0.1.2
+Version: 0.1.3
 Author: Compdigitec
 Author URI: http://www.compdigitec.com/
 License: 3-clause BSD
 Text Domain: wp_nobot_question
 */
-define('wp_nobot_question_version','0.1.2');
+define('wp_nobot_question_version','0.1.3');
 /*
  *      Redistribution and use in source and binary forms, with or without
  *      modification, are permitted provided that the following conditions are
@@ -108,6 +108,7 @@ function wp_nobot_question_field($context = 'comment') {
 <p class="comment-form-wp_nobot_question">
 	<?php
 	$questions = wp_nobot_question_get_option('questions');
+	$answers = wp_nobot_question_get_option('answers');
 	$selected_id = rand(0,count($questions)-1);
 	?>
 	<label for="wp_nobot_answer"><?php echo htmlspecialchars($questions[$selected_id]); ?> (<?php _e('Required','wp_nobot_question'); ?>)</label>
@@ -120,6 +121,7 @@ function wp_nobot_question_field($context = 'comment') {
 		<?php if($context == 'registration') { ?> tabindex="25" <?php }; ?>
 	/>
 	<input type="hidden" name="wp_nobot_answer_question" value="<?php echo $selected_id; ?>" />
+	<input type="hidden" name="wp_nobot_answer_question_hash" value="<?php echo wp_nobot_question_security_hash($selected_id, $questions[$selected_id], $answers[$selected_id]); ?>" />
 	</p>
 <?php
 }
@@ -131,11 +133,18 @@ function wp_nobot_question_filter($x) {
 	    !wp_nobot_question_get_option('enable') ) {
 		return $x;
 	}
-	if(!array_key_exists('wp_nobot_answer',$_POST) || trim($_POST['wp_nobot_answer']) == '') {
+	if(!array_key_exists('wp_nobot_answer',$_POST) || !array_key_exists('wp_nobot_answer_question',$_POST) || trim($_POST['wp_nobot_answer']) == '') {
 		wp_die(__('Error: Please fill in the required question.','wp_nobot_question'));
 	}
 	$question_id = intval($_POST['wp_nobot_answer_question']);
+	$questions_all = wp_nobot_question_get_option('questions');
 	$answers_all = wp_nobot_question_get_option('answers');
+	// Hash verification to make sure the bot isn't picking on one answer.
+	// This does not mean that they got the question right.
+	if(trim($_POST['wp_nobot_answer_question_hash']) != wp_nobot_question_security_hash($question_id,$questions_all[$question_id],$answers_all[$question_id])) {
+		wp_die(__('Error: Please fill in the correct answer to the question.','wp_nobot_question'));
+	}
+	// Verify the answer.
 	if($question_id < count($answers_all)) {
 		$answers = $answers_all[$question_id];
 		foreach($answers as $answer) {
@@ -168,13 +177,21 @@ function wp_nobot_question_get_option($o) {
 	}
 }
 
+function wp_nobot_question_security_hash($id,$question,$answer) {
+	/*
+	 * Hash format: SHA256( Question ID + Question Title + serialize( Question Answers ) )
+	 */
+	$hash_string = strval($id) . strval($question) . serialize($answer);
+	return hash('sha256',$hash_string);
+}
+
 function wp_nobot_question_template($id_,$question,$answers) {
 	$id = intval($id_);
 ?>
 	<tr valign="top" class="wp_nobot_question_row_<?php echo $id; ?>">
 	<th scope="row"><?php _e('Question to present to bot','wp_nobot_question'); ?></th>
 	<td>
-		<input type="input" name="wp_nobot_question_question_<?php echo $id; ?>" size="70" value="<?php echo $question; ?>" placeholder="<?php _e('Type here to add a new question','wp_nobot_question'); ?>" /><a href="javascript:void(0)" onclick="wp_nobot_question_delete_entire_question(&quot;<?php echo $id ?>&quot;)"><?php echo __('Delete Question'); ?></a>
+		<input type="input" name="wp_nobot_question_question_<?php echo $id; ?>" size="70" value="<?php echo htmlspecialchars($question); ?>" placeholder="<?php _e('Type here to add a new question','wp_nobot_question'); ?>" /><a href="javascript:void(0)" onclick="wp_nobot_question_delete_entire_question(&quot;<?php echo $id ?>&quot;)"><?php echo __('Delete Question'); ?></a>
 	</td>
 	</tr>
 	<tr valign="top" class="wp_nobot_question_row_<?php echo $id; ?>">
@@ -184,7 +201,7 @@ function wp_nobot_question_template($id_,$question,$answers) {
 $i = 0;
 foreach($answers as $value) {
 	echo "<span id=\"wp_nobot_question_line_{$id}_$i\">";
-	printf('<input type="input" id="wp_nobot_question_answer_%1$d_%2$d" name="wp_nobot_question_answers_%1$d[]" size="70" value="%3$s" />', $id, $i, $value);
+	printf('<input type="input" id="wp_nobot_question_answer_%1$d_%2$d" name="wp_nobot_question_answers_%1$d[]" size="70" value="%3$s" />', $id, $i, htmlspecialchars($value));
 	echo "<a href=\"javascript:void(0)\" onclick=\"wp_nobot_question_delete(&quot;$id&quot;, &quot;$i&quot;)\">" . __('Delete') . "</a>";
 	echo "<br /></span>\n";
 	$i++;
@@ -207,8 +224,16 @@ function wp_nobot_question_admin() {
 				// value starts with wp_nobot_question_question_
 				$q_id = str_replace('wp_nobot_question_question_','',$key);
 				if(trim(strval($value)) != '') { // if not empty
-					$questions[] = trim(strval($value));
-					$answers[] = array_filter($_POST['wp_nobot_question_answers_' . $q_id]);
+					$question_slashed = trim(strval($value));
+					// WordPress seems to add quotes by default, see:
+					// http://stackoverflow.com/questions/1746078/wordpress-2-8-6-foobars-my-theme-options-with-escape-slashes#answers-header
+					// http://core.trac.wordpress.org/ticket/18322
+					$questions[] = stripslashes($question_slashed);
+					$answers_slashed = array_filter($_POST['wp_nobot_question_answers_' . $q_id]);
+					foreach($answers_slashed as $key => $value) {
+						$answers_slashed[$key] = stripslashes($value);
+					}
+					$answers[] = $answers_slashed;
 				}
 			}
 		}

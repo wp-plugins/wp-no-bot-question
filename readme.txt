@@ -37,6 +37,12 @@ Make sure you are using a WordPress 3.0 theme - upgrade your theme to use `comme
 
 
 == Changelog ==
+= 0.1.3 =
+* 883ed15 Add a basic hashing mechanism to the question
+* 9214d36 Support questions/answers with quotation marks
+* 3b35ca3 Escape HTML special characters in admin
+* 787b294 Validate the existance of the wp_nobot_answer_question field
+
 = 0.1.2 =
 * c911cc4 Update fr-FR translation
 * e84f760 Bump the version to 0.1.2
