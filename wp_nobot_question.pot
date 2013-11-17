@@ -1,8 +1,8 @@
-# Copyright (C) 2012 WP No-Bot Question
+# Copyright (C) 2013 WP No-Bot Question
 # This file is distributed under the same license as the WP No-Bot Question package.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP No-Bot Question 0.1.2\n"
+"Project-Id-Version: WP No-Bot Question 0.1.4\n"
 "Report-Msgid-Bugs-To: http://wordpress.org/tag/wp_nobot_question\n"
 "POT-Creation-Date: 2013-01-01 01:55:10+00:00\n"
 "MIME-Version: 1.0\n"
