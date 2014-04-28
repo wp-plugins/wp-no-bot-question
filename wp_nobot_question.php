@@ -3,13 +3,13 @@
 Plugin Name: WP No-Bot Question
 Plugin URI: http://www.compdigitec.com/apps/wpnobot/
 Description: Simple question that blocks most spambots (and paid robots) by making them answer a common sense question
-Version: 0.1.4
+Version: 0.1.5
 Author: Compdigitec
 Author URI: http://www.compdigitec.com/
 License: 3-clause BSD
 Text Domain: wp_nobot_question
 */
-define('wp_nobot_question_version','0.1.4');
+define('wp_nobot_question_version','0.1.5');
 /*
  *      Redistribution and use in source and binary forms, with or without
  *      modification, are permitted provided that the following conditions are
