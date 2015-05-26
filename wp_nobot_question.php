@@ -3,13 +3,13 @@
 Plugin Name: WP No-Bot Question
 Plugin URI: http://www.compdigitec.com/apps/wpnobot/
 Description: Simple question that blocks most spambots (and paid robots) by making them answer a common sense question
-Version: 0.1.5
+Version: 0.1.6
 Author: Compdigitec
 Author URI: http://www.compdigitec.com/
 License: 3-clause BSD
 Text Domain: wp_nobot_question
 */
-define('wp_nobot_question_version','0.1.5');
+define('wp_nobot_question_version','0.1.6');
 /*
  *      Redistribution and use in source and binary forms, with or without
  *      modification, are permitted provided that the following conditions are
@@ -47,6 +47,7 @@ register_uninstall_hook( __FILE__, 'wp_nobot_question_remove' );
 
 add_action('init', 'wp_nobot_question_init');
 add_action('admin_menu', 'wp_nobot_question_admin_init');
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'wp_nobot_question_plugin_action_links');
 
 add_action('comment_form_after_fields', 'wp_nobot_question_comment_field');
 add_action('comment_form_logged_in_after', 'wp_nobot_question_comment_field');
@@ -89,6 +90,11 @@ function wp_nobot_question_admin_init() {
 		update_option('wp_nobot_question_answers',Array(get_option('wp_nobot_question_answers')));
 		add_option('wp_nobot_question_db_version', wp_nobot_question_current_db_version);
 	}
+}
+
+function wp_nobot_question_plugin_action_links($links) {
+	$links[] = '<a href="'. esc_url( get_admin_url(null, 'options-general.php?page=wp_nobot_question_page') ) .'">' . __('Settings','wp_nobot_question') . '</a>';
+	return $links;
 }
 
 function wp_nobot_question_comment_field() {

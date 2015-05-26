@@ -3,7 +3,7 @@ Contributors: edwardw
 Donate link: http://www.compdigitec.com/
 Tags: anti-bot, anti-spam, comments, question, captcha, anti-bot question, anti-spam question, bots
 Requires at least: 3.1
-Tested up to: 3.9
+Tested up to: 4.3
 Stable tag: trunk
 
 Simple question that blocks most spambots (and paid robots) by making them answer a common sense question
@@ -37,6 +37,11 @@ Make sure you are using a WordPress 3.0 theme - upgrade your theme to use `comme
 
 
 == Changelog ==
+= 0.1.6 =
+* 6768a8f Tested with 4.3
+* fd0d6e2 l10n: update
+* 4662faf Add direct access to settings
+
 = 0.1.5 =
 * 51f4772 Tested with 3.9
 
